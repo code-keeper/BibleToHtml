@@ -1,0 +1,192 @@
+﻿@model BibleModel
+<head>
+	<style type="text/css">
+	 a, a:visited {
+		color: #343434;
+	}
+	</style>
+</head>
+<body style="font-family:PrimaryFont">
+	@if(Request.Params["navpoint"] == null)
+	{
+		<div epub:type="toc frontmatter">
+			<h1 style="text-align: center;" id="toc">SISUKORD</h1>
+			<br />
+			<table width="100%">
+			@foreach(section s in Model.sections)
+			{
+				<tr>
+					<td  style="text-align: center;">
+						<a href="#@s.name.Replace(" ", "_").ToLower()"><h2 style="display:block; margin: 0.5em 0 0.5em 0;">@s.name.ToUpper()</h2></a>
+					</td>
+				</tr>
+			}
+			</table>
+		</div>
+
+
+		foreach(section s in Model.sections)
+		{
+		 <mbp:pagebreak />
+		 <div style=”page-break-before:always;”></div>
+		 <div id="@s.name.Replace(" ", "_").ToLower()" epub:type="division">
+			@* <div>
+				<a href="@(s.id == 2 ? "#vana_testament" : "#uus_testament")"><h2 style="text-decoration:underline; margin-bottom: 0;">@s.name</h2></a>
+				<table width="100%">
+				@foreach(book b in Model.books.Where(m => m.section_id == s.id))
+				{
+					<tr>
+						<td style="height: 1em;">
+							<a href="#@b.name_short" style="display:block; margin-top: 1em;">@b.name</a>
+						</td>
+					</tr>
+				}
+				</table>
+			 </div>*@
+			  <div style="text-align:center;">
+				<a href="@(s.id == 2 ? "#vana_testament" : "#uus_testament")"><h2 style="text-decoration:underline; margin-bottom: 0;">@s.name</h2></a>
+				<table width="100%">
+				@{int counter = 0;}
+					@foreach(book b in Model.books.Where(m => m.section_id == s.id))
+					{
+						@newRow(counter, 3)
+							<td style="text-align: center;">
+								<a href="#@b.name_short" style="margin: 0.5em 0 0.5em 0; display:block;">@normalizeChNameShort(b.name_short)</a>
+							</td>
+						counter++;
+					}
+				@endTableRow()
+				</table>
+			 </div>
+			 @foreach(book b in Model.books.Where(m => m.section_id == s.id).OrderBy(m => m.id))
+			{
+				<div id="@b.name_short" epub:type="part">
+					<div id="@(b.name_short)_toc" epub:type="page-list">
+						<mbp:pagebreak />
+						<div style=”page-break-before:always;”></div>
+						<h2 style="text-align: center;"><a href="#@s.name.Replace(" ", "_").ToLower()">@b.name</a></h2>
+						<table width="100%">
+							@{counter = 0;}
+							@foreach(chapter c in Model.chapters.Where(m => m.book_id == b.id).OrderBy(m => m.number))
+							{
+								@newRow(counter, 7)
+								<td style="width: 10%; text-align:center;">
+									<a href="#@(b.name_short)_@c.number" style="margin: 0.5em 0 0.5em 0; display:block;">@c.number</a>
+								</td>	
+								counter++;
+							}
+							@endTableRow()
+						</table>
+					</div>
+					@foreach(chapter c in Model.chapters.Where(m => m.book_id == b.id).OrderBy(m => m.number))
+					{
+						<mbp:pagebreak />
+						<div style=”page-break-before:always;”></div>
+						<div id="@(b.name_short)_@c.number" epub:type="chapter">
+							@{verse f_verse = Model.verses.FirstOrDefault(m => m.chapter_id == c.id && m.number == 1); }
+							<h2 style="text-align: center; @(f_verse == null ? "" : String.IsNullOrEmpty(f_verse.heading) ? "" : "margin: 1em 0 0 0;")"><a href="#@s.name.Replace(" ", "_").ToLower()">@normalizeChNameShort(b.name_short)</a> <a href="#@(b.name_short)_toc">@c.number</a></h2>
+							@foreach(verse v in Model.verses.Where(m => m.chapter_id == c.id).OrderBy(m => m.number))
+							{
+								if(!String.IsNullOrEmpty(v.heading))
+								{
+									if(v.number == 1)
+									{
+										@:<h3 style="margin: 0 0 0.5em 0;text-align: center;">
+									}
+									else
+									{
+										@:<h3 style="margin: 1.5em 0 0.5em 0;text-align: center;">
+									}
+										@v.heading
+									@:</h3>
+								}
+									@(v.number + " " + v.content)<br />
+							
+							}
+						</div>
+					}
+				</div>
+			}
+		 </div>
+		}
+	 }
+	else
+	{
+		int c = 2;
+		int last_section_id = 1;
+		<div>
+			&lt;navMap&gt;
+			@printNavPoint(1, "toc", "Sisukord")
+			@printNavPoint(c, "vana_testament", "Vana Testament")
+			@foreach(book b in Model.books)
+			{
+				c++;
+				if(b.section_id != last_section_id)
+				{
+					last_section_id = b.section_id;
+					if(b.section_id == 2)
+					{
+						@printNavPoint(c, "uus_testament", "Uus Testament")
+					}
+					else if(b.section_id == 3)
+					{
+						@printNavPoint(c, "apokrüüfid", "Apokrüüfid")
+					}
+					else
+					{
+						c--;
+					}
+				}
+				else
+				{
+				@printNavPoint(c, b.name_short + "_toc", b.name)
+				}
+			}
+			&lt;/navMap&gt;
+		</div>
+	}
+</body>
+	   
+@helper startTableRow(){
+	@:<tr>	
+}
+
+@helper endTableRow(){
+	@:</tr>	
+}
+
+@helper printNavPoint(int order_nr, string anchur, string text){
+	<div>
+		&lt;navPoint id="ncx_@anchur" playOrder="@order_nr" &gt;
+			&lt;navLabel&gt;
+				&lt;text&gt;@text&lt;/text&gt;
+			&lt;/navLabel&gt;
+			&lt;content src="bible.html#@anchur" /&gt;
+		&lt;/navPoint&gt;
+	</div>
+}
+
+@helper newRow(int cur_col, int cols)
+{
+	if(cur_col % (double)cols == 0)
+	{
+		if(cur_col != 0)
+		{
+			@endTableRow()
+		}
+		@startTableRow()
+	}	
+}
+
+@functions{
+	public string normalizeChNameShort(string ch_name)
+	{
+		char first_char = ch_name[0];
+		if(Char.IsNumber(first_char))
+		{
+		 return first_char.ToString() + ". " + ch_name.Substring(1);
+		}
+		else
+			return ch_name;
+	}
+}

@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="bible.Models" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="book">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="name_short" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="section_id" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="section" Relationship="Self.Book_fk" FromRole="book" ToRole="section" />
+    <NavigationProperty Name="chapter" Relationship="Self.chapter_fk" FromRole="book" ToRole="chapter" />
+  </EntityType>
+  <EntityType Name="chapter">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="book_id" Type="Int32" Nullable="false" />
+    <Property Name="number" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="book" Relationship="Self.chapter_fk" FromRole="chapter" ToRole="book" />
+    <NavigationProperty Name="verse" Relationship="Self.verse_fk" FromRole="chapter" ToRole="verse" />
+  </EntityType>
+  <EntityType Name="section">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="Int32" Nullable="false" />
+    <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+    <NavigationProperty Name="book" Relationship="Self.Book_fk" FromRole="section" ToRole="book" />
+  </EntityType>
+  <EntityType Name="verse">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="number" Type="Int32" Nullable="false" />
+    <Property Name="heading" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="content" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+    <Property Name="chapter_id" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="chapter" Relationship="Self.verse_fk" FromRole="verse" ToRole="chapter" />
+  </EntityType>
+  <Association Name="Book_fk">
+    <End Role="section" Type="Self.section" Multiplicity="1" />
+    <End Role="book" Type="Self.book" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="section">
+        <PropertyRef Name="id" />
+      </Principal>
+      <Dependent Role="book">
+        <PropertyRef Name="section_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="chapter_fk">
+    <End Role="book" Type="Self.book" Multiplicity="1" />
+    <End Role="chapter" Type="Self.chapter" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="book">
+        <PropertyRef Name="id" />
+      </Principal>
+      <Dependent Role="chapter">
+        <PropertyRef Name="book_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="verse_fk">
+    <End Role="chapter" Type="Self.chapter" Multiplicity="1" />
+    <End Role="verse" Type="Self.verse" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="chapter">
+        <PropertyRef Name="id" />
+      </Principal>
+      <Dependent Role="verse">
+        <PropertyRef Name="chapter_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="book" EntityType="Self.book" />
+    <EntitySet Name="chapter" EntityType="Self.chapter" />
+    <EntitySet Name="section" EntityType="Self.section" />
+    <EntitySet Name="verse" EntityType="Self.verse" />
+    <AssociationSet Name="Book_fk" Association="Self.Book_fk">
+      <End Role="section" EntitySet="section" />
+      <End Role="book" EntitySet="book" />
+    </AssociationSet>
+    <AssociationSet Name="chapter_fk" Association="Self.chapter_fk">
+      <End Role="book" EntitySet="book" />
+      <End Role="chapter" EntitySet="chapter" />
+    </AssociationSet>
+    <AssociationSet Name="verse_fk" Association="Self.verse_fk">
+      <End Role="chapter" EntitySet="chapter" />
+      <End Role="verse" EntitySet="verse" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="bible.Models.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="book">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="name_short" Type="nvarchar" MaxLength="10" Nullable="false" />
+    <Property Name="name" Type="nvarchar" MaxLength="100" />
+    <Property Name="section_id" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="chapter">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="book_id" Type="int" Nullable="false" />
+    <Property Name="number" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="section">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="int" Nullable="false" />
+    <Property Name="name" Type="nvarchar" MaxLength="100" Nullable="false" />
+  </EntityType>
+  <EntityType Name="verse">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="number" Type="int" Nullable="false" />
+    <Property Name="heading" Type="nvarchar" MaxLength="100" />
+    <Property Name="content" Type="nvarchar(max)" />
+    <Property Name="chapter_id" Type="int" Nullable="false" />
+  </EntityType>
+  <Association Name="Book_fk">
+    <End Role="section" Type="Self.section" Multiplicity="1" />
+    <End Role="book" Type="Self.book" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="section">
+        <PropertyRef Name="id" />
+      </Principal>
+      <Dependent Role="book">
+        <PropertyRef Name="section_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="chapter_fk">
+    <End Role="book" Type="Self.book" Multiplicity="1" />
+    <End Role="chapter" Type="Self.chapter" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="book">
+        <PropertyRef Name="id" />
+      </Principal>
+      <Dependent Role="chapter">
+        <PropertyRef Name="book_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="verse_fk">
+    <End Role="chapter" Type="Self.chapter" Multiplicity="1" />
+    <End Role="verse" Type="Self.verse" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="chapter">
+        <PropertyRef Name="id" />
+      </Principal>
+      <Dependent Role="verse">
+        <PropertyRef Name="chapter_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="bibleModelsStoreContainer">
+    <EntitySet Name="book" EntityType="Self.book" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="chapter" EntityType="Self.chapter" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="section" EntityType="Self.section" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="verse" EntityType="Self.verse" Schema="dbo" store:Type="Tables" />
+    <AssociationSet Name="Book_fk" Association="Self.Book_fk">
+      <End Role="section" EntitySet="section" />
+      <End Role="book" EntitySet="book" />
+    </AssociationSet>
+    <AssociationSet Name="chapter_fk" Association="Self.chapter_fk">
+      <End Role="book" EntitySet="book" />
+      <End Role="chapter" EntitySet="chapter" />
+    </AssociationSet>
+    <AssociationSet Name="verse_fk" Association="Self.verse_fk">
+      <End Role="chapter" EntitySet="chapter" />
+      <End Role="verse" EntitySet="verse" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>
