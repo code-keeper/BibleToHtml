@@ -38,7 +38,7 @@ INSERT  @dropAndCreateConstraintsTable
                    AND ( ForeignKeys.referenced_column_id = sys.columns.column_id )
         WHERE   ( sys.objects.[type] = 'U' )
                 AND ( sys.objects.[name] NOT IN ( 'sysdiagrams' ) )
-/* SELECT * FROM @dropAndCreateConstraintsTable AS DACCT  --Test statement*/
+/* SELECT * FROM @dropAndCreateConstraintsTable AS DACCT  --Test statement */
 DECLARE @DropStatement NVARCHAR(MAX)
 DECLARE @RecreateStatement NVARCHAR(MAX)
 /* Drop Constraints */
